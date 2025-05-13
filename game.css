@@ -1,0 +1,13 @@
+.wasd {
+    position: absolute;
+    z-index: 9999;
+    top: 20px;
+    right: 50px;
+    width: 180px;
+}
+
+.background {
+    background-image: url('redplanet.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
