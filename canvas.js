@@ -7,12 +7,14 @@ let context = canvas.getContext("2d");
 let spaceship = {
     posY: 10,
     posX: 10,
-    speed: 5,
+    speed: 10,
     scale: 1
 }
 
+let frameIndex = 7
 const spriteSheet = new Image();
 spriteSheet.src = "rymdskepp/Fighter/Move.png";
+let count = 0
 
 let lastTimestamp = 0,
       maxFPS = 60,
@@ -25,17 +27,32 @@ let lastTimestamp = 0,
 let keys = {}
 
 function animate() {
+    const frameWidth = 125;
+    const frameHeight = 192;
+    const spriteDrawWidth = frameWidth * spaceship.scale;
+    const spriteDrawHeight = 150 * spaceship.scale;
+
     context.drawImage(
         spriteSheet,
-        5 * 200,
         0,
-        200,
-        125,
+        frameIndex * frameHeight,
+        frameWidth,
+        frameHeight,
         spaceship.posX,
         spaceship.posY,
-        200 * spaceship.scale,
-        100 * spaceship.scale
+        spriteDrawWidth,
+        spriteDrawHeight
     );
+
+    count ++;
+    if(count > 10) {
+        frameIndex ++;
+        count = 0;
+    }
+
+    if(frameIndex > 5) {
+        frameIndex = 0;
+    }
 }
 
 function drawSpaceship(spaceship) {
