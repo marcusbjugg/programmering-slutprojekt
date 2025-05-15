@@ -3,39 +3,55 @@ canvas.width = window.innerWidth - 18;
 canvas.height = window.innerHeight - 20;
 
 let context = canvas.getContext("2d"); 
-
+let count = 0
 let spaceship = {
     posY: 10,
     posX: 10,
     speed: 10,
     scale: 1
-}
+  }
 
-let frameIndex = 7
-const spriteSheet = new Image();
-spriteSheet.src = "rymdskepp/Fighter/Move.png";
-let count = 0
 
+const State = {
+    states: {},
+    generateState: function(name, startIndex, endIndex, spriteSheetSrc, frameWidth, frameHeight) {
+        if(!this.states[name]) {
+            const image = new Image();
+            image.src = spriteSheetSrc;
+            this.states[name] = {
+                frameIndex: startIndex,
+                startIndex: startIndex,
+                endIndex: endIndex,
+                spritesheet: image,
+                frameWidth: frameWidth,
+                frameHeight: frameHeight
+            };
+        }
+    },
+    getState: function(name) {
+        if (this.states[name]) {
+            return this.states[name];
+        }
+    }
+};
+
+State.generateState("idle", 0, 5,"rymdskepp/Fighter/Move.png", 125, 192)
 let lastTimestamp = 0,
-      maxFPS = 60,
-      timestep = 1000 / maxFPS // ms for each frame
-
-    /**
-     * timestamp är en inparameter som skickas in i funktionen av requestAnimationFrame()
-     */
+      maxFPS = 1000,
+      timestep = 1000 / maxFPS 
 
 let keys = {}
 
-function animate() {
-    const frameWidth = 125;
-    const frameHeight = 192;
+function animate(state) {
+    const frameWidth = state.frameWidth;
+    const frameHeight = state.frameHeight;
     const spriteDrawWidth = frameWidth * spaceship.scale;
     const spriteDrawHeight = 150 * spaceship.scale;
 
     context.drawImage(
-        spriteSheet,
+        state.spritesheet,
         0,
-        frameIndex * frameHeight,
+        state.frameIndex * frameHeight,
         frameWidth,
         frameHeight,
         spaceship.posX,
@@ -45,13 +61,13 @@ function animate() {
     );
 
     count ++;
-    if(count > 10) {
-        frameIndex ++;
+    if(count > timestep) {
+        state.frameIndex ++;
         count = 0;
     }
 
-    if(frameIndex > 5) {
-        frameIndex = 0;
+    if(state.frameIndex > state.endIndex) {
+        state.frameIndex = state.startIndex;
     }
 }
 
@@ -87,7 +103,7 @@ function update(timestamp) {
 
     console.log("Uppdaterar");
     clearCanvas();
-    animate()
+    animate(State.getState("idle"));
     requestAnimationFrame(update);
 }
  
