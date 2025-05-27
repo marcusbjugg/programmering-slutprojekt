@@ -6,7 +6,8 @@ let context = canvas.getContext("2d");
 
 let count = 0;
 let bullets = [];
-const bulletImage = document.querySelector(".bulletImage");
+let canShoot = true; // anti-skott spammning
+let keys = {};
 
 let spaceship = {
     posY: 10,
@@ -25,10 +26,24 @@ const State = {
 let lastTimestamp = 0;
 let maxFPS = 60;
 let timestep = 1000 / maxFPS;
-let keys = {};
 
+// ladda bilder
 const idleImage = new Image();
 idleImage.src = "rymdskepp/Fighter/Move.png";
+
+const bulletImage = new Image();
+bulletImage.src = "rymdskepp/Fighter/Charge_1.png";
+
+// vänta på att båda bilderna laddas innan spelet börjar
+let imagesLoaded = 0;
+
+function tryStartGame() {
+    imagesLoaded++;
+    if (imagesLoaded === 2) {
+        requestAnimationFrame(update); // när båda bilder är laddade
+    }
+}
+
 idleImage.onload = () => {
     State.states["idle"] = {
         frameIndex: 0,
@@ -38,7 +53,11 @@ idleImage.onload = () => {
         frameWidth: 125,
         frameHeight: 192
     };
-    requestAnimationFrame(update); // när bilden har laddats
+    tryStartGame();
+};
+
+bulletImage.onload = () => {
+    tryStartGame();
 };
 
 function animate(state) {
@@ -86,7 +105,7 @@ function updateBullets() {
     for (let i = 0; i < bullets.length; i++) {
         bullets[i].y -= bullets[i].speed;
     }
-    bullets = bullets.filter(bullet => bullet.y < canvas.width);
+    bullets = bullets.filter(bullet => bullet.y > 0);
 }
 
 function drawBullets() {
@@ -111,11 +130,11 @@ document.addEventListener("keydown", function(event) {
 });
 
 document.addEventListener("keyup", function(event) {
-    keys[event.key] = false;
-
     if (event.key === " ") {
         canShoot = true; // anti-skott spammning
     }
+
+    keys[event.key] = false;
 });
 
 function update(timestamp) {
