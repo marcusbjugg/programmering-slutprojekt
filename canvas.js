@@ -6,7 +6,7 @@ let context = canvas.getContext("2d");
 
 let count = 0;
 let bullets = [];
-let canShoot = true; // anti-skott spammning
+let canShoot = true;
 let keys = {};
 
 let spaceship = {
@@ -28,20 +28,26 @@ let lastTimestamp = 0;
 let maxFPS = 60;
 let timestep = 1000 / maxFPS;
 
-// ladda bilder
 const idleImage = new Image();
 idleImage.src = "rymdskepp/Fighter/Move.png";
 
 const bulletImage = new Image();
 bulletImage.src = "rymdskepp/Fighter/Charge_1.png";
 
-// vänta på att båda bilderna laddas innan spelet börjar
+const turnLeftImage = new Image();
+turnLeftImage.src = "rymdskepp/Fighter/Turn_2.png";
+
+const turnRightImage = new Image();
+turnRightImage.src = "rymdskepp/Fighter/Turn_1.png";
+
+const shootSound = new Audio("rymdskepp/Ljud/shoot.mp3");
+
 let imagesLoaded = 0;
 
 function tryStartGame() {
     imagesLoaded++;
-    if (imagesLoaded === 2) {
-        requestAnimationFrame(update); // när båda bilder är laddade
+    if (imagesLoaded === 4) {
+        requestAnimationFrame(update);
     }
 }
 
@@ -61,8 +67,32 @@ bulletImage.onload = () => {
     tryStartGame();
 };
 
+turnLeftImage.onload = () => {
+    State.states["turnLeft"] = {
+        frameIndex: 0,
+        startIndex: 0,
+        endIndex: 3,
+        spritesheet: turnLeftImage,
+        frameWidth: 125,
+        frameHeight: 192
+    };
+    tryStartGame();
+};
+
+turnRightImage.onload = () => {
+    State.states["turnRight"] = {
+        frameIndex: 0,
+        startIndex: 0,
+        endIndex: 3,
+        spritesheet: turnRightImage,
+        frameWidth: 125,
+        frameHeight: 192
+    };
+    tryStartGame();
+};
+
 function animate(state) {
-    if (!state.spritesheet.complete) return; // om bilden inte har laddats
+    if (!state.spritesheet.complete) return;
 
     const frameWidth = state.frameWidth;
     const frameHeight = state.frameHeight;
@@ -100,6 +130,8 @@ function shootBullet() {
         width: 20,
         height: 13
     });
+    shootSound.currentTime = 0;
+    shootSound.play();
 }
 
 function updateBullets() {
@@ -125,14 +157,14 @@ document.addEventListener("keydown", function(event) {
 
         if (event.key === " " && canShoot) {
             shootBullet();
-            canShoot = false; // anti-skott spammning
+            canShoot = false;
         }
     }
 });
 
 document.addEventListener("keyup", function(event) {
     if (event.key === " ") {
-        canShoot = true; // anti-skott spammning
+        canShoot = true;
     }
 
     keys[event.key] = false;
@@ -144,19 +176,29 @@ function update(timestamp) {
         return;
     }
 
-    const state = State.getState("idle");
-    const spriteWidth = state.frameWidth * spaceship.scale;
-    const spriteHeight = state.frameHeight * spaceship.scale;
+    const isMovingLeft = keys["a"];
+    const isMovingRight = keys["d"];
+    let currentState = "idle";
 
-    if (keys["d"] && spaceship.posX + spriteWidth + spaceship.speedX <= canvas.width - 0) {
+    const state = () => {
+        if (isMovingLeft && !isMovingRight) return "turnLeft";
+        if (isMovingRight && !isMovingLeft) return "turnRight";
+        return "idle";
+    };
+
+    const sprite = State.getState(state());
+    const spriteWidth = sprite.frameWidth * spaceship.scale;
+    const spriteHeight = sprite.frameHeight * spaceship.scale;
+
+    if (isMovingRight && spaceship.posX + spriteWidth + spaceship.speedX <= canvas.width) {
         spaceship.posX += spaceship.speedX;
     }
 
-    if (keys["a"] && spaceship.posX - spaceship.speedX >= -48) {
+    if (isMovingLeft && spaceship.posX - spaceship.speedX >= -48) {
         spaceship.posX -= spaceship.speedX;
     }
 
-    if (keys["s"] && spaceship.posY + spriteHeight + spaceship.speedY <= canvas.height - -30) {
+    if (keys["s"] && spaceship.posY + spriteHeight + spaceship.speedY <= canvas.height + 30) {
         spaceship.posY += spaceship.speedY;
     }
 
@@ -165,7 +207,7 @@ function update(timestamp) {
     }
 
     clearCanvas();
-    animate(state);
+    animate(sprite);
     updateBullets();
     drawBullets();
 
