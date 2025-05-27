@@ -12,7 +12,8 @@ let keys = {};
 let spaceship = {
     posY: 10,
     posX: 10,
-    speed: 15,
+    speedX: 15,
+    speedY: 10,
     scale: 0.7
 };
 
@@ -143,13 +144,28 @@ function update(timestamp) {
         return;
     }
 
-    if (keys["d"]) { spaceship.posX += spaceship.speed; }
-    if (keys["a"]) { spaceship.posX -= spaceship.speed; }
-    if (keys["s"]) { spaceship.posY += spaceship.speed; }
-    if (keys["w"]) { spaceship.posY -= spaceship.speed; }
+    const state = State.getState("idle");
+    const spriteWidth = state.frameWidth * spaceship.scale;
+    const spriteHeight = state.frameHeight * spaceship.scale;
+
+    if (keys["d"] && spaceship.posX + spriteWidth + spaceship.speedX <= canvas.width - 0) {
+        spaceship.posX += spaceship.speedX;
+    }
+
+    if (keys["a"] && spaceship.posX - spaceship.speedX >= -48) {
+        spaceship.posX -= spaceship.speedX;
+    }
+
+    if (keys["s"] && spaceship.posY + spriteHeight + spaceship.speedY <= canvas.height - -30) {
+        spaceship.posY += spaceship.speedY;
+    }
+
+    if (keys["w"] && spaceship.posY - spaceship.speedY >= -30) {
+        spaceship.posY -= spaceship.speedY;
+    }
 
     clearCanvas();
-    animate(State.getState("idle"));
+    animate(state);
     updateBullets();
     drawBullets();
 
