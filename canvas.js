@@ -19,8 +19,8 @@ let pointDisplay = document.getElementById("points");
 
 //skapar spelaren
 let spaceship = {            
-    posY: 500,
-    posX: 700,
+    posY: 300,
+    posX: 585,
     speedX: 15,
     speedY: 10,
     scale: 0.7,
