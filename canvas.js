@@ -62,7 +62,7 @@ turnRightImage.src = "rymdskepp/Fighter/Turn_2.png";
 const idleEnemyImage = new Image();
 idleEnemyImage.src = "rymdskepp/Corvette/Move.png";
 
-const shootSound = new Audio("rymdskepp/Ljud/shoot.mp3");
+const shootSound = new Audio("shoot.mp3");
 
 //Startar inte spelet förrän spelet har kollat att alla spritesheets och animationer/objekt har laddat in
 let imagesLoaded = 0;
